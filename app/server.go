@@ -26,7 +26,7 @@ func (s *ServerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	commands := strings.Fields(cmdStr)
-	cmd := exec.Command(commands[0], commands[1:]...)
+	cmd := exec.CommandContext(r.Context(), commands[0], commands[1:]...)
 
 	// 捕获输出
 	var wg sync.WaitGroup
