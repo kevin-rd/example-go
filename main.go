@@ -2,46 +2,30 @@ package main
 
 import (
 	"context"
-	"github.io/kevin-rd/demo-go/app"
 	"log"
-	"net/http"
-	"os"
-	"os/signal"
-	"sync"
-	"syscall"
-	"time"
+	"math/big"
+
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 func main() {
-	server := &http.Server{
-		Addr:    ":12345",
-		Handler: &app.ServerHandler{},
+	client, err := ethclient.Dial("http://testnet-rpc.mechain.tech")
+	if err != nil {
+		log.Fatalf("Failed to connect to the Ethereum client: %v", err)
 	}
 
-	var mainWg sync.WaitGroup
-	mainWg.Add(1)
+	block, err := client.BlockByNumber(context.TODO(), big.NewInt(372379))
+	if err != nil {
+		log.Fatalf("Failed to retrieve balance: %v", err)
+	}
+	log.Println(block.Transactions().Len())
 
-	go func() {
-		defer mainWg.Done()
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Printf("HTTP Server listen and serve failed: %v", err)
-			os.Exit(0)
+	for i, transaction := range block.Transactions() {
+		txHash := transaction.Hash()
+		receipt, err := client.TransactionReceipt(context.TODO(), txHash)
+		if err != nil {
+			log.Fatalf("Failed to get tx Receipt: %v", err)
 		}
-		log.Println("Http Server has been Closed.")
-	}()
-
-	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, syscall.SIGKILL, syscall.SIGSTOP, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2)
-	s := <-ch
-	close(ch)
-	log.Printf("Received signal: %v", s)
-	if err := func() error {
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-		defer cancel()
-		return server.Shutdown(ctx)
-	}(); err != nil {
-		log.Printf("HTTP Server shutdown failed: %v", err)
+		log.Println(i, receipt.TransactionIndex, receipt.TxHash.Hex(), receipt.BlockNumber, receipt.CumulativeGasUsed, receipt.Status)
 	}
-	mainWg.Wait()
-	log.Println("Process has been Exit.")
 }
