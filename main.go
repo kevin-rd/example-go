@@ -14,7 +14,7 @@ import (
 
 func main() {
 	server := &http.Server{
-		Addr:    ":12345",
+		Addr:    ":8080",
 		Handler: &app.ServerHandler{},
 	}
 

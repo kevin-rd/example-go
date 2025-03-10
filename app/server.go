@@ -14,6 +14,10 @@ import (
 type ServerHandler struct{}
 
 func (s *ServerHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	handleHello(w, r)
+}
+
+func (s *ServerHandler) ServeHTTP2(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseForm(); err != nil {
 		return
 	}
