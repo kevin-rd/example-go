@@ -2,19 +2,23 @@ package main
 
 import (
 	"context"
+	"errors"
 	"github.io/kevin-rd/demo-go/app"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"sync"
 	"syscall"
 	"time"
 )
 
+const port = 8080
+
 func main() {
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    ":" + strconv.Itoa(port),
 		Handler: &app.ServerHandler{},
 	}
 
@@ -23,7 +27,8 @@ func main() {
 
 	go func() {
 		defer mainWg.Done()
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Printf("Http Server listen and serve on %d", port)
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Printf("HTTP Server listen and serve failed: %v", err)
 			os.Exit(0)
 		}

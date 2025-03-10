@@ -18,7 +18,7 @@ spec:
       containers:
         - name: demo-go
           image: kevin2025/demo-go
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8080
