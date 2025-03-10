@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-go
+  labels:
+    app: demo-go
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-go
+  template:
+    metadata:
+      name: demo-go
+      labels:
+        app: demo-go
+    spec:
+      containers:
+        - name: demo-go
+          image: kevin2025/demo-go
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+      restartPolicy: Always
+      
