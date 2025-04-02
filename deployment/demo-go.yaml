@@ -11,17 +11,18 @@ spec:
       app: demo-go
   template:
     metadata:
-      name: demo-go
       labels:
         app: demo-go
+        app.kubernetes.io/name: go
+        app.kubernetes.io/instance: demo-go
     spec:
       containers:
         - name: demo-go
-          image: kevin2025/demo-go
+          image: kevin2025/demo-go:latest
           imagePullPolicy: Always
-          ports:
-            - name: http
-              containerPort: 8080
-              protocol: TCP
-      restartPolicy: Always
-      
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+          volumeMounts: []
+      volumes: []
