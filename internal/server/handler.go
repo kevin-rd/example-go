@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/google/uuid"
 	"net/http"
 	"time"
 
@@ -12,11 +13,13 @@ func HandleHello(w http.ResponseWriter, r *http.Request, log *zap.Logger) {
 	start := time.Now()
 
 	// 记录请求日志
-	log.Info("receive request",
+	log.Info("receive request: hello",
 		zap.String("method", r.Method),
 		zap.String("url", r.URL.String()),
 		zap.String("client_ip", r.RemoteAddr),
 		zap.Int8("Int8", 28),
+		zap.String("trace_id", uuid.New().String()),
+		zap.String("log_tag", "module1"),
 	)
 
 	// 处理请求
