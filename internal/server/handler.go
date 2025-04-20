@@ -5,6 +5,8 @@ import (
 	"net/http"
 )
 
+type HandlerFunc func(w http.ResponseWriter, r *http.Request, log *zap.Logger, traceId string)
+
 // HandleHello 处理 /hello 请求
 func HandleHello(w http.ResponseWriter, r *http.Request, log *zap.Logger, traceId string) {
 	// handle request

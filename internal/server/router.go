@@ -18,7 +18,7 @@ func InitRouter(log *zap.Logger) *http.ServeMux {
 	return mux
 }
 
-func handleWrap(next func(http.ResponseWriter, *http.Request, *zap.Logger, string), log *zap.Logger) http.HandlerFunc {
+func handleWrap(next HandlerFunc, log *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// pre handle
 		start := time.Now()
@@ -36,7 +36,7 @@ func handleWrap(next func(http.ResponseWriter, *http.Request, *zap.Logger, strin
 		if duration > time.Second*2 {
 			log.Warn("slow request",
 				zap.String("trace_id", traceId),
-				zap.String("log_tag", "module1"),
+				zap.String("log_tag", "http_server"),
 				zap.Duration("duration", duration),
 				zap.String("url", r.URL.String()),
 			)
