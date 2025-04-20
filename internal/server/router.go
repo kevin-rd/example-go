@@ -1,7 +1,11 @@
 package server
 
 import (
+	"github.com/google/uuid"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.io/kevin-rd/demo-go/internal/metrics"
 	"net/http"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -9,8 +13,33 @@ import (
 // InitRouter 初始化 HTTP 服务器的路由
 func InitRouter(log *zap.Logger) *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
-		HandleHello(w, r, log)
-	})
+	mux.Handle("/metrics", promhttp.Handler())
+	mux.HandleFunc("/hello", handleWrap(HandleHello, log))
 	return mux
+}
+
+func handleWrap(next func(http.ResponseWriter, *http.Request, *zap.Logger, string), log *zap.Logger) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// pre handle
+		start := time.Now()
+		traceId := r.Header.Get("X-Trace-Id")
+		if traceId == "" {
+			traceId = uuid.New().String()
+		}
+
+		// handle
+		next(w, r, log, traceId)
+
+		// post handle
+		duration := time.Since(start)
+		metrics.RequestsCost.WithLabelValues(r.Method, r.URL.Path).Observe(duration.Seconds())
+		if duration > time.Second*2 {
+			log.Warn("slow request",
+				zap.String("trace_id", traceId),
+				zap.String("log_tag", "module1"),
+				zap.Duration("duration", duration),
+				zap.String("url", r.URL.String()),
+			)
+		}
+	}
 }
