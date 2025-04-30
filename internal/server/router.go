@@ -15,12 +15,15 @@ func InitRouter(log *zap.Logger) *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", promhttp.Handler())
 	mux.HandleFunc("/hello", handleWrap(HandleHello, log))
-	mux.HandleFunc("/basic-auth", handleWrap(basicAuthHandleWrap(HandleHello, "user_xxx", "passwd_xxx"), log))
-	mux.HandleFunc("/token-auth", handleWrap(tokenAuthHandleWrap(HandleHello, "token_xxx"), log))
+	mux.HandleFunc("/basic-auth", basicAuthHandleWrap(HandleHello, log, "user_xxx", "passwd_xxx"))
+	mux.HandleFunc("/token-auth", tokenAuthHandleWrap(HandleHello, log, "token_xxx"))
+	mux.HandleFunc("/token-auth2", handleWrap(tokenAuthWrap(HandleHello, "token_xxx"), log))
 
 	return mux
 }
 
+// handleWrap is a higher-order function
+// that wraps a handler function HandlerFunc and adds logging capabilities before and after its execution.
 func handleWrap(next HandlerFunc, log *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// pre handle
@@ -44,5 +47,21 @@ func handleWrap(next HandlerFunc, log *zap.Logger) http.HandlerFunc {
 				zap.String("url", r.URL.String()),
 			)
 		}
+	}
+}
+
+// basicAuthHandleWrap is a higher-order function
+// that wraps a handler function HandlerFunc and adds basic authentication capabilities before its execution.
+func basicAuthHandleWrap(next HandlerFunc, log *zap.Logger, username, password string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		handleWrap(basicAuthWrap(next, username, password), log)
+	}
+}
+
+// tokenAuthHandleWrap is a higher-order function
+// that wraps a handler function HandlerFunc and adds token authentication capabilities before its execution.
+func tokenAuthHandleWrap(next HandlerFunc, log *zap.Logger, token string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		handleWrap(tokenAuthWrap(next, token), log)
 	}
 }

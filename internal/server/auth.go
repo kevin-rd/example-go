@@ -7,7 +7,8 @@ import (
 	"strings"
 )
 
-func basicAuthHandleWrap(next HandlerFunc, username, password string) HandlerFunc {
+// basicAuthWrap is a wrap function that handles basic authentication.
+func basicAuthWrap(next HandlerFunc, username, password string) HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, log *zap.Logger) {
 		auth := r.Header.Get("Authorization")
 		if !strings.HasPrefix(auth, "Basic ") {
@@ -28,7 +29,8 @@ func basicAuthHandleWrap(next HandlerFunc, username, password string) HandlerFun
 	}
 }
 
-func tokenAuthHandleWrap(next HandlerFunc, token string) HandlerFunc {
+// tokenAuthWrap is a wrap function that handles token authentication.
+func tokenAuthWrap(next HandlerFunc, token string) HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, log *zap.Logger) {
 		auth := r.Header.Get("Authorization")
 		if !strings.HasPrefix(auth, "Bearer ") {
