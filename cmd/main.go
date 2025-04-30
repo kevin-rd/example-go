@@ -2,15 +2,15 @@ package main
 
 import (
 	"context"
+	"errors"
+	"github.io/kevin-rd/demo-go/internal/logger"
+	"github.io/kevin-rd/demo-go/internal/server"
 	"go.uber.org/zap"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
-
-	"github.io/kevin-rd/demo-go/internal/logger"
-	"github.io/kevin-rd/demo-go/internal/server"
 )
 
 func main() {
@@ -18,28 +18,45 @@ func main() {
 	log := logger.InitLogger()
 	defer log.Sync()
 
+	addr := ":8080"
 	router := server.InitRouter(log)
-	srv := &http.Server{Addr: ":8080", Handler: router}
+	srv := &http.Server{Addr: addr, Handler: router}
+
 	go func() {
-		addr := ":8080"
-		log.Info("server start", zap.String("address", addr))
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatal("server start failed", zap.Error(err))
+		log.Info("Server start", zap.String("address", addr))
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatal("Server failed", zap.Error(err))
 		}
-		log.Info("server stop")
+		log.Info("Server stop")
 	}()
 
-	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, syscall.SIGKILL, syscall.SIGSTOP, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2)
-	s := <-ch
-	close(ch)
-	log.Info("Received signal", zap.String("signal", s.String()))
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
-	defer cancel()
+	stopSignal(log, func() {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+		defer cancel()
 
-	if err := srv.Shutdown(ctx); err != nil {
-		log.Error("HTTP Server shutdown failed", zap.Error(err))
-	} else {
-		log.Info("Process has been Exit.")
+		if err := srv.Shutdown(ctx); err != nil {
+			log.Error("HTTP Server shutdown failed", zap.Error(err))
+		} else {
+			log.Info("Process has been Exit.")
+		}
+	})
+}
+
+func stopSignal(log *zap.Logger, onClose func()) {
+	stopCh := make(chan os.Signal, 1)
+	signal.Notify(stopCh, syscall.SIGINT, syscall.SIGTERM)
+
+	count := 0
+	for sig := range stopCh {
+		count++
+		log.Warn("Receive signal", zap.String("signal", sig.String()), zap.Int("count", count))
+
+		if count == 1 {
+			log.Info("First signal received, initiating graceful shutdown...")
+			go onClose()
+		} else if count >= 3 {
+			log.Warn("Receive signal again, force exit.")
+			os.Exit(1)
+		}
 	}
 }
