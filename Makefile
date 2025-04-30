@@ -1,8 +1,8 @@
-APP_NAME = demo-go
+APP_NAME = example-go
 BINARY_NAME = ${APP_NAME}
 
 build:
-	go build -o build/${BINARY_NAME} cmd/main.go
+	go build -o build/${BINARY_NAME} cmd/*.go
 
 
 docker-build:
