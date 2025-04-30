@@ -11,7 +11,7 @@ type HandlerFunc func(w http.ResponseWriter, r *http.Request, log *zap.Logger)
 func HandleHello(w http.ResponseWriter, r *http.Request, log *zap.Logger) {
 	// handle request
 	var pi float64
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10000; i++ {
 		pi += (4.0 / (float64)(2.0*i+1.0)) * (1.0 - (2.0*(float64)(i%2))/1.0)
 	}
 
@@ -26,9 +26,4 @@ func HandleHello(w http.ResponseWriter, r *http.Request, log *zap.Logger) {
 
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte("Hello, Zap!\n"))
-}
-
-// HandleBasicAuth is an example of http basic auth
-func HandleBasicAuth(w http.ResponseWriter, r *http.Request, log *zap.Logger) {
-
 }
