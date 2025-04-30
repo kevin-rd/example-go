@@ -5,16 +5,18 @@ import (
 	"net/http"
 )
 
-type HandlerFunc func(w http.ResponseWriter, r *http.Request, log *zap.Logger, traceId string)
+type HandlerFunc func(w http.ResponseWriter, r *http.Request, log *zap.Logger)
 
 // HandleHello 处理 /hello 请求
-func HandleHello(w http.ResponseWriter, r *http.Request, log *zap.Logger, traceId string) {
+func HandleHello(w http.ResponseWriter, r *http.Request, log *zap.Logger) {
 	// handle request
-	result := 3.14 * 8
+	var pi float64
+	for i := 0; i < 100; i++ {
+		pi += (4.0 / (float64)(2.0*i+1.0)) * (1.0 - (2.0*(float64)(i%2))/1.0)
+	}
 
 	log.Info("receive request: hello",
-		zap.Float64("result", result),
-		zap.String("trace_id", traceId),
+		zap.Float64("pi", pi),
 		zap.String("log_tag", "module01"),
 		zap.String("method", r.Method),
 		zap.String("url", r.URL.String()),
@@ -23,5 +25,10 @@ func HandleHello(w http.ResponseWriter, r *http.Request, log *zap.Logger, traceI
 	)
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Hello, Zap!\n"))
+	_, _ = w.Write([]byte("Hello, Zap!\n"))
+}
+
+// HandleBasicAuth is an example of http basic auth
+func HandleBasicAuth(w http.ResponseWriter, r *http.Request, log *zap.Logger) {
+
 }

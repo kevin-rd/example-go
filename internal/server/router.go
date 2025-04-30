@@ -15,6 +15,9 @@ func InitRouter(log *zap.Logger) *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.Handle("/metrics", promhttp.Handler())
 	mux.HandleFunc("/hello", handleWrap(HandleHello, log))
+	mux.HandleFunc("/basic-auth", handleWrap(basicAuthHandleWrap(HandleHello, "user_xxx", "passwd_xxx"), log))
+	mux.HandleFunc("/token-auth", handleWrap(tokenAuthHandleWrap(HandleHello, "token_xxx"), log))
+
 	return mux
 }
 
@@ -26,16 +29,16 @@ func handleWrap(next HandlerFunc, log *zap.Logger) http.HandlerFunc {
 		if traceId == "" {
 			traceId = uuid.New().String()
 		}
+		log = log.With(zap.String("trace_id", traceId))
 
 		// handle
-		next(w, r, log, traceId)
+		next(w, r, log)
 
 		// post handle
 		duration := time.Since(start)
 		metrics.RequestsCost.WithLabelValues(r.Method, r.URL.Path).Observe(duration.Seconds())
 		if duration > time.Second*2 {
 			log.Warn("slow request",
-				zap.String("trace_id", traceId),
 				zap.String("log_tag", "http_server"),
 				zap.Duration("duration", duration),
 				zap.String("url", r.URL.String()),
