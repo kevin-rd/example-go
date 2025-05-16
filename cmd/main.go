@@ -32,7 +32,7 @@ func main() {
 	wg := &sync.WaitGroup{}
 	defer func() {
 		wg.Wait()
-		log.Info("All goroutines finished")
+		log.Info("All goroutines finished.")
 	}()
 
 	wg.Add(1)
