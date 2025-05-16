@@ -1,5 +1,7 @@
 package main
 
+import _ "go.uber.org/automaxprocs"
+
 import (
 	"context"
 	"errors"
@@ -17,13 +19,11 @@ import (
 func main() {
 	// 初始化日志
 	log := logger.InitLogger()
-	defer func(log *zap.Logger) {
-		log.Debug("Log shutdown")
-		err := log.Sync()
-		if err != nil {
-			log.Info("Log shutdown failed", zap.Error(err))
+	defer func() {
+		if err := log.Sync(); err != nil && !errors.Is(err, syscall.ENOTTY) {
+			log.Error("Failed to sync logger", zap.Error(err))
 		}
-	}(log)
+	}()
 
 	addr := ":8080"
 	router := server.InitRouter(log)
@@ -68,8 +68,7 @@ func waitStopSignal(log *zap.Logger, fns ...func()) {
 	stopSigCh := make(chan os.Signal, 1)
 	signal.Notify(stopSigCh, syscall.SIGINT, syscall.SIGTERM)
 
-	canStopCh := make(chan struct{}, 1)
-
+	canStopCh := make(chan struct{})
 	count := 0
 	for {
 		select {
@@ -83,7 +82,7 @@ func waitStopSignal(log *zap.Logger, fns ...func()) {
 					for _, fn := range fns {
 						fn()
 					}
-					canStopCh <- struct{}{}
+					close(canStopCh)
 				}()
 			} else if count >= 3 {
 				log.Error("Receive signal again, force exit.")
