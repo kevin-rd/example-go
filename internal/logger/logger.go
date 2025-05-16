@@ -22,10 +22,10 @@ func InitLogger() *zap.Logger {
 	var core zapcore.Core
 	if isRunningInKubernetes() {
 		encoder = zapcore.NewJSONEncoder(config)
-		core = zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), zapcore.DebugLevel)
+		core = zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), zapcore.InfoLevel)
 	} else {
 		encoder = zapcore.NewConsoleEncoder(config)
-		core = zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), zapcore.InfoLevel)
+		core = zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), zapcore.DebugLevel)
 	}
 	return zap.New(core)
 }
