@@ -43,7 +43,7 @@ func main() {
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatal("Http Server ListenAndServe failed", zap.Error(err))
 		}
-		log.Info("Http Server ListenAndServe stop.")
+		log.Info("Http Server ListenAndServe stop")
 	}()
 
 	wg.Add(1)
