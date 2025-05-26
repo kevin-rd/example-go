@@ -18,9 +18,9 @@ func InitRouter(log *zap.Logger) *http.ServeMux {
 	mux.Handle("/metrics", promhttp.Handler())
 
 	// health
-	mux.HandleFunc("/health/startup", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) })
-	mux.HandleFunc("/health/liveness", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) })
-	mux.HandleFunc("/health/readiness", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) })
+	mux.HandleFunc("/health/startup", handleWrap(HandleHealth, log))
+	mux.HandleFunc("/health/liveness", handleWrap(HandleHealth, log))
+	mux.HandleFunc("/health/readiness", handleWrap(HandleHealth, log))
 
 	// demo
 	mux.HandleFunc("/hello", handleWrap(HandleHello, log))

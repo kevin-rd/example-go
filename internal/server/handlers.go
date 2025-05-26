@@ -30,3 +30,8 @@ func HandleHello(w http.ResponseWriter, r *http.Request, log *zap.Logger) {
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte("Hello, Zap!\n"))
 }
+
+func HandleHealth(w http.ResponseWriter, r *http.Request, log *zap.Logger) {
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte("ok"))
+}
