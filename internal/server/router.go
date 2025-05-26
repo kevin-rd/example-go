@@ -13,7 +13,16 @@ import (
 // InitRouter 初始化 HTTP 服务器的路由
 func InitRouter(log *zap.Logger) *http.ServeMux {
 	mux := http.NewServeMux()
+
+	// metrics
 	mux.Handle("/metrics", promhttp.Handler())
+
+	// health
+	mux.HandleFunc("/health/startup", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) })
+	mux.HandleFunc("/health/liveness", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) })
+	mux.HandleFunc("/health/readiness", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusOK) })
+
+	// demo
 	mux.HandleFunc("/hello", handleWrap(HandleHello, log))
 	mux.HandleFunc("/basic-auth", basicAuthHandleWrap(HandleHello, log, "user_xxx", "passwd_xxx"))
 	mux.HandleFunc("/token-auth", tokenAuthHandleWrap(HandleHello, log, "token_xxx"))
