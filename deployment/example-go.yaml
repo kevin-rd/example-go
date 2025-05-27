@@ -1,24 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: demo-go
+  name: example-go
   labels:
-    app: demo-go
+    app: example-go
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: demo-go
+      app: example-go
   template:
     metadata:
       labels:
-        app: demo-go
-        app.kubernetes.io/name: go
-        app.kubernetes.io/instance: demo-go
+        app: example-go
     spec:
       containers:
-        - name: demo-go
-          image: kevin2025/demo-go:latest
+        - name: example-go
+          image: kevin2025/example-go:latest
           imagePullPolicy: Always
           ports:
             - name: http
