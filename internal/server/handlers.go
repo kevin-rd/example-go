@@ -18,7 +18,7 @@ func HandleHello(w http.ResponseWriter, r *http.Request, log *zap.Logger) {
 
 	time.Sleep(time.Second * 5)
 
-	log.Info("receive request: hello",
+	log.Info("handle request: hello",
 		zap.Float64("pi", pi),
 		zap.String("log_tag", "module01"),
 		zap.String("method", r.Method),
@@ -28,7 +28,7 @@ func HandleHello(w http.ResponseWriter, r *http.Request, log *zap.Logger) {
 	)
 
 	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write([]byte("Hello, Zap!\n"))
+	_, _ = w.Write([]byte("Hello!\n"))
 }
 
 func HandleHealth(w http.ResponseWriter, r *http.Request, log *zap.Logger) {

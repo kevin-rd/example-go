@@ -10,7 +10,7 @@ var (
 		Name:      "requests-total",
 		Help:      "all requests cost",
 		Buckets:   prometheus.ExponentialBuckets(0.001, 5, 7),
-	}, []string{"method", "path"})
+	}, []string{"method", "path", "status"})
 )
 
 func init() {

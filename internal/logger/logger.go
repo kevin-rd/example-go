@@ -15,8 +15,6 @@ func InitLogger() *zap.Logger {
 	config.EncodeTime = func(t time.Time, encoder zapcore.PrimitiveArrayEncoder) {
 		encoder.AppendString(t.Format(TimeFormatDataTimeMill))
 	}
-	config.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	config.EncodeCaller = zapcore.FullCallerEncoder
 
 	var encoder zapcore.Encoder
 	var core zapcore.Core
@@ -24,6 +22,9 @@ func InitLogger() *zap.Logger {
 		encoder = zapcore.NewJSONEncoder(config)
 		core = zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), zapcore.InfoLevel)
 	} else {
+		config.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		config.EncodeCaller = zapcore.FullCallerEncoder
+
 		encoder = zapcore.NewConsoleEncoder(config)
 		core = zapcore.NewCore(encoder, zapcore.AddSync(os.Stdout), zapcore.DebugLevel)
 	}
