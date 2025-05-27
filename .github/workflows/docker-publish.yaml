@@ -35,7 +35,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: main
+          tags: kevin2025/example-go:latest
           platforms: linux/amd64
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
